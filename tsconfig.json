@@ -14,8 +14,11 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "declaration": false,
-    "noEmit": true
+    "noEmit": true,
+    "paths": {
+      "@src/*": ["./automation/src/*"]
+    }
   },
-  "include": ["tests/**/*.ts", "playwright.config.ts"],
+  "include": ["automation/**/*.ts", "playwright.config.ts", "automation/tests/**/*.ts"],
   "exclude": ["node_modules", "dist", "playwright-report", "test-results"]
 }

@@ -9,9 +9,9 @@ app.use(express.static(path.join(__dirname, '../public')));
 const carts = new Map();
 
 const discountCodes = {
-  'SAVE10': 10,
-  'SAVE20': 20,
-  'HALF': 50
+  SAVE10: 10,
+  SAVE20: 20,
+  HALF: 50,
 };
 
 app.post('/cart', (req, res) => {
@@ -54,7 +54,7 @@ app.post('/cart/:cartId/items', (req, res) => {
     id: uuidv4(),
     name,
     price,
-    quantity
+    quantity,
   };
 
   cart.items.push(item);
@@ -67,7 +67,7 @@ app.delete('/cart/:cartId/items/:itemId', (req, res) => {
     return res.status(404).json({ error: 'Cart not found' });
   }
 
-  const itemIndex = cart.items.findIndex(item => item.id === req.params.itemId);
+  const itemIndex = cart.items.findIndex((item) => item.id === req.params.itemId);
   if (itemIndex === -1) {
     return res.status(404).json({ error: 'Item not found' });
   }
@@ -93,9 +93,9 @@ app.post('/cart/:cartId/discount', (req, res) => {
 });
 
 function calculateCartSummary(cart) {
-  const items = cart.items.map(item => ({
+  const items = cart.items.map((item) => ({
     ...item,
-    subtotal: item.price * item.quantity
+    subtotal: item.price * item.quantity,
   }));
 
   const subtotal = items.reduce((sum, item) => sum + item.subtotal, 0);
@@ -113,7 +113,7 @@ function calculateCartSummary(cart) {
     subtotal: Math.round(subtotal * 100) / 100,
     discountCode: cart.discountCode,
     discount: Math.round(discount * 100) / 100,
-    total: Math.round(total * 100) / 100
+    total: Math.round(total * 100) / 100,
   };
 }
 
