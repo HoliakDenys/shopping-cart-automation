@@ -7,6 +7,7 @@ Write automated tests for the Shopping Cart API application to verify its functi
 ## Application Overview
 
 This is a simple shopping cart web application that allows users to:
+
 - Add items to a cart (with name, price, and quantity)
 - Remove items from the cart
 - Apply discount codes
@@ -27,14 +28,14 @@ Write automated tests covering the following areas:
 
 Test the following endpoints:
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/cart` | POST | Create a new cart |
-| `/cart/:cartId` | GET | Get cart details and summary |
-| `/cart/:cartId/items` | POST | Add item to cart |
-| `/cart/:cartId/items/:itemId` | DELETE | Remove item from cart |
-| `/cart/:cartId/discount` | POST | Apply discount code |
-| `/health` | GET | Health check |
+| Endpoint                      | Method | Description                  |
+| ----------------------------- | ------ | ---------------------------- |
+| `/cart`                       | POST   | Create a new cart            |
+| `/cart/:cartId`               | GET    | Get cart details and summary |
+| `/cart/:cartId/items`         | POST   | Add item to cart             |
+| `/cart/:cartId/items/:itemId` | DELETE | Remove item from cart        |
+| `/cart/:cartId/discount`      | POST   | Apply discount code          |
+| `/health`                     | GET    | Health check                 |
 
 #### Functional Testing
 
@@ -59,11 +60,11 @@ Test the following endpoints:
 
 The application supports the following discount codes:
 
-| Code | Expected Discount |
-|------|-------------------|
-| SAVE10 | 10% off total |
-| SAVE20 | 20% off total |
-| HALF | 50% off total |
+| Code   | Expected Discount |
+| ------ | ----------------- |
+| SAVE10 | 10% off total     |
+| SAVE20 | 20% off total     |
+| HALF   | 50% off total     |
 
 ### 4. Deliverables
 
