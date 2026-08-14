@@ -172,6 +172,23 @@ test.describe('Cart Item API - Negative', () => {
     });
   });
 
+  test('should return 400 when adding an item without quantity field', async ({
+    apiClient,
+    cartItemBuilder,
+    cartId,
+  }) => {
+    const incompleteItem = cartItemBuilder.build();
+    delete (incompleteItem as { quantity?: number }).quantity;
+
+    const addItemResponse = await apiClient.addItem(cartId, incompleteItem);
+
+    await expectStatus(addItemResponse, 400);
+
+    await test.step('Verify the response data contains the expected error message for missing quantity', async () => {
+      expect(addItemResponse.data).toEqual({ error: ERROR_MESSAGES.INVALID_QUANTITY });
+    });
+  });
+
   test('should return 404 when removing a non-existent item from cart', async ({
     apiClient,
     cartId,

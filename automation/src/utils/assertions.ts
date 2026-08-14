@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Locator } from '@playwright/test';
 import type { ApiResponse, ErrorResponse } from '@src/types.js';
 
 export async function expectStatus(response: { status: number }, expectedStatus: number) {
@@ -19,4 +19,11 @@ export function expectError(
   expect(response.status, `Expected error status, got ${response.status}`).toBeGreaterThanOrEqual(
     400,
   );
+}
+
+export async function expectRangeUnderflow(locator: Locator) {
+  const isUnderflow = await locator.evaluate(
+    (node: HTMLInputElement) => node.validity.rangeUnderflow,
+  );
+  expect(isUnderflow).toBe(true);
 }
