@@ -20,7 +20,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'docker-compose up --build',
+    command: 'npm start',
     url: 'http://localhost:3000/health',
     reuseExistingServer: !process.env.CI,
     timeout: 60_000,
