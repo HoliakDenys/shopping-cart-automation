@@ -18,7 +18,7 @@ async function addItem(name, price, quantity) {
     const response = await fetch(`/cart/${cartId}/items`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, price, quantity })
+      body: JSON.stringify({ name, price, quantity }),
     });
 
     if (!response.ok) {
@@ -50,7 +50,7 @@ async function applyDiscount(code) {
     const response = await fetch(`/cart/${cartId}/discount`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code })
+      body: JSON.stringify({ code }),
     });
 
     if (!response.ok) {
@@ -77,7 +77,9 @@ async function updateCartDisplay() {
     if (cart.items.length === 0) {
       cartItemsEl.innerHTML = '<p class="empty-cart">Your cart is empty</p>';
     } else {
-      cartItemsEl.innerHTML = cart.items.map(item => `
+      cartItemsEl.innerHTML = cart.items
+        .map(
+          (item) => `
         <div class="cart-item">
           <div class="cart-item-info">
             <div class="cart-item-name">${item.name}</div>
@@ -86,7 +88,9 @@ async function updateCartDisplay() {
           <span class="cart-item-subtotal">$${item.subtotal.toFixed(2)}</span>
           <button class="btn btn-danger" onclick="removeItem('${item.id}')">Remove</button>
         </div>
-      `).join('');
+      `,
+        )
+        .join('');
     }
 
     document.getElementById('subtotal').textContent = `$${cart.subtotal.toFixed(2)}`;
