@@ -2,7 +2,7 @@
 
 ## BUG-01: Discount calculation applies only to the first cart item's subtotal
 
-**Severity:** Medium
+**Severity:** High
 
 ### Description:
 

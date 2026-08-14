@@ -135,7 +135,7 @@ This repository contains an end-to-end and API automation test suite built using
 
 - `POST /cart` & `GET /cart/:cartId`: Successful cart creation and initial empty cart state retrieval
 - `GET /health`: Server health check returning 200 OK
-- **Negative Cases:** 404 response for non-existent cart IDs; 400 validation response for malformed UUID inputs
+- Negative Cases: 404 response for non-existent cart IDs; identified a defect where malformed cart IDs return 404 instead of the expected 400 validation response
 
 **Cart Item Operations** (`cartItem.spec.ts`):
 
@@ -176,6 +176,14 @@ This repository contains an end-to-end and API automation test suite built using
 
 - Applying valid discount codes dynamically updates order summary labels (discount amount & total)
 - Form validation: Blocking item submission when quantity is set to zero or negative
+
+### Test Results
+
+- API and UI test suites cover positive, negative, edge-case, and business-logic scenarios.
+- Known expected failures are documented and correspond to identified defects:
+  - BUG-01: incorrect discount calculation for carts with multiple items
+  - BUG-03: malformed cart IDs return `404` instead of `400`
+- All other automated scenarios pass successfully.
 
 ### Running Automated Tests
 
