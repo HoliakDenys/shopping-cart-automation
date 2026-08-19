@@ -1,8 +1,9 @@
 {
-  "name": "shopping-cart-api",
+  "name": "shopping-cart-automation",
   "version": "1.0.0",
   "type": "module",
-  "description": "Simple shopping cart API with discount functionality",
+  "description": "Playwright + TypeScript automation suite for shopping cart API and UI validation",
+  "license": "MIT",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
