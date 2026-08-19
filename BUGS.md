@@ -71,3 +71,60 @@ When requesting a cart with a malformed ID format (e.g., `/cart/invalid-id-123`)
 ### Actual Result:
 
 - The API returns `404 Not Found` because it treats a malformed ID the same way as a non-existent ID in the database.
+
+---
+
+## BUG-04: Extreme price values corrupt cart totals to `null`
+
+**Severity:** High
+
+### Description:
+
+The item creation endpoint accepts arbitrarily large `price` values (e.g.,
+`1e308`) without an upper bound check. When the cart summary is later
+recalculated, the rounding operation (`Math.round(subtotal * 100) / 100`)
+overflows past `Number.MAX_VALUE`, producing `Infinity`. Since
+`JSON.stringify(Infinity)` serializes to `null`, the API response for
+`subtotal`/`total` silently becomes `null` instead of a number — a value
+that violates the endpoint's own response contract.
+
+### Steps to Reproduce:
+
+1. Create a new cart.
+2. Add an item with `price: 1e308`, `quantity: 1`.
+3. `GET /cart/:cartId`.
+
+### Expected Result:
+
+- The API should reject an out-of-range `price` with `400 Bad Request`,
+  or cap it to a sane maximum.
+
+### Actual Result:
+
+- Item creation returns `201`. The subsequent `GET /cart/:cartId` response
+  has `subtotal`/`total` as `null`.
+
+---
+
+## BUG-05: Fractional quantity is accepted
+
+**Severity:** Medium
+
+### Description:
+
+The item creation endpoint validates `quantity < 1` but does not check
+that the value is an integer. A cart can end up with a nonsensical
+fractional quantity (e.g., `1.5` units of an item).
+
+### Steps to Reproduce:
+
+1. Create a new cart.
+2. Add an item with `quantity: 1.5`.
+
+### Expected Result:
+
+- The API should return `400 Bad Request` for a non-integer quantity.
+
+### Actual Result:
+
+- The item is created successfully (`201`) with `quantity: 1.5`.
