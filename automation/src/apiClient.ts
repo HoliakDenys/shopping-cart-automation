@@ -56,6 +56,17 @@ export class ApiClient {
     return { status: response.status(), data, raw: response };
   }
 
+  @Step('Add an item with raw payload to the cart')
+  async addItemRaw(
+    cartId: string,
+    payload: Record<string, unknown>,
+  ): Promise<ApiResponse<CartItem | ErrorResponse>> {
+    const response = await this.request.post(API_ENDPOINTS.CART_ITEMS(cartId), { data: payload });
+    const data = await response.json();
+    this.handleResponse(response.status(), data, addItemResponseSchema);
+    return { status: response.status(), data, raw: response };
+  }
+
   @Step('Remove an item from the cart')
   async removeItem(cartId: string, itemId: string): Promise<ApiResponse<null | ErrorResponse>> {
     const response = await this.request.delete(API_ENDPOINTS.CART_ITEM_BY_ID(cartId, itemId));
@@ -74,6 +85,19 @@ export class ApiClient {
   ): Promise<ApiResponse<ApplyDiscountResponse | ErrorResponse>> {
     const response = await this.request.post(API_ENDPOINTS.CART_DISCOUNT(cartId), {
       data: { code },
+    });
+    const data = await response.json();
+    this.handleResponse(response.status(), data, discountResponseSchema);
+    return { status: response.status(), data, raw: response };
+  }
+
+  @Step('Apply raw discount code to the cart')
+  async applyDiscountRaw(
+    cartId: string,
+    payload: Record<string, unknown>,
+  ): Promise<ApiResponse<ApplyDiscountResponse | ErrorResponse>> {
+    const response = await this.request.post(API_ENDPOINTS.CART_DISCOUNT(cartId), {
+      data: payload,
     });
     const data = await response.json();
     this.handleResponse(response.status(), data, discountResponseSchema);

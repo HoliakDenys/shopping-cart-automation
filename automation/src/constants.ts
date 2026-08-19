@@ -28,3 +28,12 @@ export const DISCOUNT_CODES = {
   SAVE20: { code: 'SAVE20', expectedValue: '20%' },
   HALF: { code: 'HALF', expectedValue: '50%' },
 } as const;
+
+export const TYPE_CONFUSION_DISCOUNT_CODE = { toString: () => 'SAVE10' };
+
+export const MALFORMED_ITEM_PAYLOADS = {
+  NAME_AS_NUMBER: { name: 123, price: 10, quantity: 1 },
+  PRICE_AS_STRING: { name: 'Test Item', price: '19.99', quantity: 1 },
+  QUANTITY_AS_STRING: { name: 'Test Item', price: 19.99, quantity: '2' },
+  PRICE_AS_ARRAY: { name: 'Test Item', price: [10], quantity: 1 },
+} as const;

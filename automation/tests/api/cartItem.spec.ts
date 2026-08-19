@@ -1,6 +1,12 @@
-import { ERROR_MESSAGES, NON_EXISTENT_ID } from '@src/constants.js';
+import {
+  ERROR_MESSAGES,
+  MALFORMED_ITEM_PAYLOADS,
+  NON_EXISTENT_ID,
+  TYPE_CONFUSION_DISCOUNT_CODE,
+} from '@src/constants.js';
 import { test, expect } from '@src/fixtures.js';
 import { expectError, expectStatus, expectSuccess } from '@src/utils/assertions.js';
+import { roundCurrency } from '@src/utils/currency.js';
 
 test.describe('Cart Item API - Positive', () => {
   test('should successfully add an item to the cart', async ({
@@ -8,7 +14,7 @@ test.describe('Cart Item API - Positive', () => {
     cartItemBuilder,
     cartId,
   }) => {
-    const newItem = cartItemBuilder.build();
+    const newItem = cartItemBuilder.withPrice(25.5).withQuantity(3).build();
 
     const addResponse = await apiClient.addItem(cartId, newItem);
 
@@ -28,10 +34,10 @@ test.describe('Cart Item API - Positive', () => {
     expectSuccess(getCartResponse);
 
     await test.step('Verify the cart summary reflects the added item', async () => {
-      const expectedTotal = newItem.price * newItem.quantity;
+      const expectedTotal = roundCurrency(newItem.price * newItem.quantity);
 
-      expect(getCartResponse.data.subtotal).toBeCloseTo(expectedTotal);
-      expect(getCartResponse.data.total).toBeCloseTo(expectedTotal);
+      expect(getCartResponse.data.subtotal).toBe(expectedTotal);
+      expect(getCartResponse.data.total).toBe(expectedTotal);
       expect(getCartResponse.data.items).toHaveLength(1);
     });
   });
@@ -199,5 +205,52 @@ test.describe('Cart Item API - Negative', () => {
     await test.step('Verify the response data contains the expected error message for non-existent item', async () => {
       expect(removeItemResponse.data).toEqual({ error: ERROR_MESSAGES.ITEM_NOT_FOUND });
     });
+  });
+
+  // TODO: create a bug report because the API should limit the upper bound for the price correctly
+  test.fail(
+    'should not corrupt cart totals when adding an item with an extreme price value',
+    async ({ apiClient, cartItemBuilder, cartId }) => {
+      const extremeItem = cartItemBuilder.withPrice(1e308).build();
+      const addResponse = await apiClient.addItem(cartId, extremeItem);
+
+      await expectStatus(addResponse, 201);
+
+      await apiClient.getCart(cartId);
+    },
+  );
+
+  // TODO: create a bug report because the API should not accept a fractional number
+  test.fail(
+    'should reject a fractional quantity',
+    async ({ apiClient, cartItemBuilder, cartId }) => {
+      const fractionalItem = cartItemBuilder.withQuantity(1.5).build();
+      const addResponse = await apiClient.addItem(cartId, fractionalItem);
+
+      await expectStatus(addResponse, 400);
+    },
+  );
+
+  test('should reject a discount code with type confusion payload', async ({
+    apiClient,
+    cartId,
+    cartItemBuilder,
+  }) => {
+    await apiClient.addItem(cartId, cartItemBuilder.build());
+
+    const response = await apiClient.applyDiscountRaw(cartId, {
+      code: TYPE_CONFUSION_DISCOUNT_CODE,
+    });
+
+    await expectStatus(response, 400);
+  });
+
+  test('should reject item payload with wrong field types', async ({ apiClient, cartId }) => {
+    for (const [caseName, payload] of Object.entries(MALFORMED_ITEM_PAYLOADS)) {
+      await test.step(`Case: ${caseName}`, async () => {
+        const response = await apiClient.addItemRaw(cartId, payload);
+        await expectStatus(response, 400);
+      });
+    }
   });
 });

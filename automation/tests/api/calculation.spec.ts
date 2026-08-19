@@ -1,5 +1,6 @@
 import { test, expect } from '@src/fixtures.js';
 import { expectStatus, expectSuccess } from '@src/utils/assertions.js';
+import { roundCurrency } from '@src/utils/currency.js';
 
 test.describe('Cart Calculation API - Positive', () => {
   test('should correctly calculate subtotal and total for multiple items', async ({
@@ -7,8 +8,8 @@ test.describe('Cart Calculation API - Positive', () => {
     cartItemBuilder,
     cartId,
   }) => {
-    const itemA = cartItemBuilder.build();
-    const itemB = cartItemBuilder.build();
+    const itemA = cartItemBuilder.withPrice(19.99).withQuantity(2).build();
+    const itemB = cartItemBuilder.withPrice(5.5).withQuantity(3).build();
 
     await apiClient.addItem(cartId, itemA);
     await apiClient.addItem(cartId, itemB);
@@ -18,12 +19,14 @@ test.describe('Cart Calculation API - Positive', () => {
     await expectStatus(getCartResponse, 200);
     expectSuccess(getCartResponse);
 
-    const expectedSubtotal = itemA.price * itemA.quantity + itemB.price * itemB.quantity;
+    const expectedSubtotal = roundCurrency(
+      itemA.price * itemA.quantity + itemB.price * itemB.quantity,
+    );
 
     await test.step('Verify the response data contains the correct subtotal, discount, and total', async () => {
-      expect(getCartResponse.data.subtotal).toBeCloseTo(expectedSubtotal, 1);
+      expect(getCartResponse.data.subtotal).toBe(expectedSubtotal);
       expect(getCartResponse.data.discount).toBe(0);
-      expect(getCartResponse.data.total).toBeCloseTo(expectedSubtotal, 1);
+      expect(getCartResponse.data.total).toBe(expectedSubtotal);
     });
   });
 
@@ -32,8 +35,8 @@ test.describe('Cart Calculation API - Positive', () => {
     cartItemBuilder,
     cartId,
   }) => {
-    const itemA = cartItemBuilder.build();
-    const itemB = cartItemBuilder.build();
+    const itemA = cartItemBuilder.withPrice(12.25).withQuantity(4).build();
+    const itemB = cartItemBuilder.withPrice(8.75).withQuantity(2).build();
 
     await apiClient.addItem(cartId, itemA);
     const addResponseB = await apiClient.addItem(cartId, itemB);
@@ -45,11 +48,11 @@ test.describe('Cart Calculation API - Positive', () => {
 
     await expectStatus(getCartResponse, 200);
     expectSuccess(getCartResponse);
-    const expectedSubtotal = itemA.price * itemA.quantity;
+    const expectedSubtotal = roundCurrency(itemA.price * itemA.quantity);
 
     await test.step('Verify the response data contains the correct subtotal, discount, and total', async () => {
-      expect(getCartResponse.data.subtotal).toBeCloseTo(expectedSubtotal, 1);
-      expect(getCartResponse.data.total).toBeCloseTo(expectedSubtotal, 1);
+      expect(getCartResponse.data.subtotal).toBe(expectedSubtotal);
+      expect(getCartResponse.data.total).toBe(expectedSubtotal);
       expect(getCartResponse.data.items).toHaveLength(1);
     });
   });
@@ -60,8 +63,8 @@ test.describe('Cart Calculation API - Negative', () => {
   test.fail(
     'should apply discount correctly to multiple items in the cart',
     async ({ apiClient, cartItemBuilder, cartId }) => {
-      const itemA = cartItemBuilder.build();
-      const itemB = cartItemBuilder.build();
+      const itemA = cartItemBuilder.withPrice(20).withQuantity(2).build();
+      const itemB = cartItemBuilder.withPrice(10).withQuantity(1).build();
 
       await apiClient.addItem(cartId, itemA);
       await apiClient.addItem(cartId, itemB);
@@ -73,14 +76,16 @@ test.describe('Cart Calculation API - Negative', () => {
       await expectStatus(getCartResponse, 200);
       expectSuccess(getCartResponse);
 
-      const expectedSubtotal = itemA.price * itemA.quantity + itemB.price * itemB.quantity;
-      const expectedDiscount = expectedSubtotal * 0.1;
-      const expectedTotal = expectedSubtotal - expectedDiscount;
+      const expectedSubtotal = roundCurrency(
+        itemA.price * itemA.quantity + itemB.price * itemB.quantity,
+      );
+      const expectedDiscount = roundCurrency(expectedSubtotal * 0.1);
+      const expectedTotal = roundCurrency(expectedSubtotal - expectedDiscount);
 
       await test.step('Verify the response data contains the correct subtotal, discount, and total', async () => {
-        expect(getCartResponse.data.subtotal).toBeCloseTo(expectedSubtotal, 1);
-        expect(getCartResponse.data.discount).toBeCloseTo(expectedDiscount, 1);
-        expect(getCartResponse.data.total).toBeCloseTo(expectedTotal, 1);
+        expect(getCartResponse.data.subtotal).toBe(expectedSubtotal);
+        expect(getCartResponse.data.discount).toBe(expectedDiscount);
+        expect(getCartResponse.data.total).toBe(expectedTotal);
       });
     },
   );
@@ -110,7 +115,7 @@ test.describe('Cart Calculation API - Edge Cases', () => {
     cartItemBuilder,
     cartId,
   }) => {
-    const item = cartItemBuilder.build();
+    const item = cartItemBuilder.withPrice(9.99).withQuantity(3).build();
 
     await apiClient.addItem(cartId, item);
     await apiClient.applyDiscount(cartId, 'SAVE10');
@@ -120,14 +125,14 @@ test.describe('Cart Calculation API - Edge Cases', () => {
     await expectStatus(getCartResponse, 200);
     expectSuccess(getCartResponse);
 
-    const expectedSubtotal = Number((item.price * item.quantity).toFixed(2));
-    const expectedDiscount = Number((expectedSubtotal * 0.1).toFixed(2));
-    const expectedTotal = Number((expectedSubtotal - expectedDiscount).toFixed(2));
+    const expectedSubtotal = roundCurrency(item.price * item.quantity);
+    const expectedDiscount = roundCurrency(expectedSubtotal * 0.1);
+    const expectedTotal = roundCurrency(expectedSubtotal - expectedDiscount);
 
     await test.step('Verify the response data contains correctly rounded decimal totals', async () => {
-      expect(getCartResponse.data.subtotal).toBeCloseTo(expectedSubtotal, 1);
-      expect(getCartResponse.data.discount).toBeCloseTo(expectedDiscount, 1);
-      expect(getCartResponse.data.total).toBeCloseTo(expectedTotal, 1);
+      expect(getCartResponse.data.subtotal).toBe(expectedSubtotal);
+      expect(getCartResponse.data.discount).toBe(expectedDiscount);
+      expect(getCartResponse.data.total).toBe(expectedTotal);
     });
   });
 });
