@@ -43,6 +43,7 @@ automation/
       cartPage.ts
     utils/
       assertions.ts
+      currency.ts
       schemaValidator.ts
       stepDecorator.ts
   tests/
