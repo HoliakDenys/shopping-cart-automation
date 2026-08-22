@@ -19,6 +19,6 @@
       "@src/*": ["./automation/src/*"]
     }
   },
-  "include": ["automation/**/*.ts", "playwright.config.ts", "automation/tests/**/*.ts"],
+  "include": ["automation/**/*.ts", "playwright.config.ts"],
   "exclude": ["node_modules", "dist", "playwright-report", "test-results"]
 }
